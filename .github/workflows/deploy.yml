@@ -5,13 +5,17 @@ on:
     - cron: "*/30 * * * *"
   workflow_dispatch:
 
+# This tells GitHub to use the newer Node.js 24 engine for all actions
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      pages: write      # Required for deploying to Pages
-      id-token: write   # Required for authentication
-    
+      pages: write
+      id-token: write
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -22,16 +26,11 @@ jobs:
         with:
           repository: Heatthunder/Text-Adventure-Game-REBUILT
           token: ${{ secrets.REPO_PAT_KEY }}
-          # Put files in the root so the artifact uploader can find them
           path: . 
-
-      - name: Debug - List Files
-        run: ls -R
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Since there's no "dist" folder, we upload the whole repository
           path: . 
 
       - name: Deploy to GitHub Pages

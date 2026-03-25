@@ -5,7 +5,8 @@ on:
     - cron: "*/30 * * * *"
   workflow_dispatch:
 
-# This tells GitHub to use the newer Node.js 24 engine for all actions
+# This is the "Master Switch" that tells GitHub to run 
+# all actions (checkout, upload, deploy) using Node.js 24.
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -13,9 +14,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      pages: write
-      id-token: write
-
+      pages: write      
+      id-token: write   
+    
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -29,10 +30,13 @@ jobs:
           path: . 
 
       - name: Upload artifact
+        # This action currently runs on Node 20 by default; 
+        # the 'env' above forces it to Node 24.
         uses: actions/upload-pages-artifact@v3
         with:
           path: . 
 
       - name: Deploy to GitHub Pages
         id: deployment
+        # This action also gets forced to Node 24 by the global env setting.
         uses: actions/deploy-pages@v4

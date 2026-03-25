@@ -5,8 +5,6 @@ on:
     - cron: "*/30 * * * *"
   workflow_dispatch:
 
-# This is the "Master Switch" that tells GitHub to run 
-# all actions (checkout, upload, deploy) using Node.js 24.
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -14,29 +12,46 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      pages: write      
-      id-token: write   
-    
+      pages: write
+      id-token: write
+
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Checkout Repo A (Private)
+      # 1. Clear the workspace to ensure no old files interfere
+      - name: Checkout Web-Build (Current Repo)
+        uses: actions/checkout@v4
+
+      # 2. Pull the actual game files from the Private Repo
+      - name: Checkout Private Game Repo
         uses: actions/checkout@v4
         with:
           repository: Heatthunder/Text-Adventure-Game-REBUILT
           token: ${{ secrets.REPO_PAT_KEY }}
-          path: . 
+          # Path '.' tells it to put the private files in the main folder
+          path: .
+          # This ensures we get the fresh version every time
+          clean: true
 
+      # 3. DEBUG: Verify index.html is actually there
+      - name: Verify Files
+        run: |
+          echo "Listing all files in the root:"
+          ls -al
+          if [ ! -f index.html ]; then
+            echo "ERROR: index.html not found in root!"
+            exit 1
+          fi
+
+      # 4. Upload everything to GitHub Pages
       - name: Upload artifact
-        # This action currently runs on Node 20 by default; 
-        # the 'env' above forces it to Node 24.
         uses: actions/upload-pages-artifact@v3
         with:
           path: . 
 
+      # 5. Deploy
       - name: Deploy to GitHub Pages
         id: deployment
-        # This action also gets forced to Node 24 by the global env setting.
         uses: actions/deploy-pages@v4

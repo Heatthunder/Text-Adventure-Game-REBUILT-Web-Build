@@ -5,13 +5,16 @@ on:
     - cron: "*/30 * * * *"
   workflow_dispatch:
 
-# This handles the Node.js 20 deprecation warning you saw
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: true 
-
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+    permissions:
+      pages: write      # Required for deploying to Pages
+      id-token: write   # Required for authentication
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout Repo A (Private)
@@ -19,42 +22,18 @@ jobs:
         with:
           repository: Heatthunder/Text-Adventure-Game-REBUILT
           token: ${{ secrets.REPO_PAT_KEY }}
-          # This is the "magic" line. It prevents the subfolder creation.
+          # Put files in the root so the artifact uploader can find them
           path: . 
 
       - name: Debug - List Files
-        # This will prove to us in the logs exactly where package.json is
         run: ls -R
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22' # Using Node 22 as requested
-
-      - name: Install dependencies
-        # This will now look in the current directory for package.json
-        run: npm install
-
-      - name: Build site
-        run: npm run build
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist 
+          # Since there's no "dist" folder, we upload the whole repository
+          path: . 
 
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write      
-      id-token: write   
-    
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

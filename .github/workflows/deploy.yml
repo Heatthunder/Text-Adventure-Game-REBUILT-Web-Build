@@ -5,6 +5,10 @@ on:
     - cron: "*/30 * * * *"
   workflow_dispatch:
 
+# This handles the Node.js 20 deprecation warning you saw
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE20: true 
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -15,18 +19,20 @@ jobs:
         with:
           repository: Heatthunder/Text-Adventure-Game-REBUILT
           token: ${{ secrets.REPO_PAT_KEY }}
-          path: .  # <--- THIS IS THE FIX: Forces code into the root directory
+          # This is the "magic" line. It prevents the subfolder creation.
+          path: . 
 
-      # DEBUG STEP: This helps us see why files are "missing"
-      - name: List files in the repository
+      - name: Debug - List Files
+        # This will prove to us in the logs exactly where package.json is
         run: ls -R
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '22' # Using Node 22 as requested
 
       - name: Install dependencies
+        # This will now look in the current directory for package.json
         run: npm install
 
       - name: Build site

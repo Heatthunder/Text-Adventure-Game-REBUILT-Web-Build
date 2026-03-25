@@ -14,14 +14,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: Heatthunder/Text-Adventure-Game-REBUILT
-          # Using your specific secret name here
           token: ${{ secrets.REPO_PAT_KEY }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Standard stable version
-          cache: 'npm'       # Speeds up future runs by caching dependencies
+          node-version: '22' 
+          # Removed the cache line to prevent the "lock file not found" error
 
       - name: Install dependencies
         run: npm install
@@ -32,15 +31,15 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # If your build folder is named something else (like 'build'), change this:
+          # IMPORTANT: Verify if your project builds to 'dist', 'build', or 'out'
           path: ./dist 
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      pages: write      # Required for deploying to Pages
-      id-token: write   # Required for authentication
+      pages: write      
+      id-token: write   
     
     environment:
       name: github-pages

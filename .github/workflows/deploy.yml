@@ -20,38 +20,28 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      # 1. Clear the workspace to ensure no old files interfere
-      - name: Checkout Web-Build (Current Repo)
-        uses: actions/checkout@v4
-
-      # 2. Pull the actual game files from the Private Repo
       - name: Checkout Private Game Repo
         uses: actions/checkout@v4
         with:
           repository: Heatthunder/Text-Adventure-Game-REBUILT
           token: ${{ secrets.REPO_PAT_KEY }}
-          # Path '.' tells it to put the private files in the main folder
           path: .
-          # This ensures we get the fresh version every time
           clean: true
 
-      # 3. DEBUG: Verify index.html is actually there
-      - name: Verify Files
+      - name: Prepare Files for Deployment
+        # We copy the contents of web/ to the root so index.html is found,
+        # but we keep all other folders exactly where they are.
         run: |
-          echo "Listing all files in the root:"
-          ls -al
-          if [ ! -f index.html ]; then
-            echo "ERROR: index.html not found in root!"
-            exit 1
-          fi
+          cp -r web/* .
+          echo "Files prepared. Final root structure:"
+          ls -F
 
-      # 4. Upload everything to GitHub Pages
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          # Upload the entire root directory (everything)
           path: . 
 
-      # 5. Deploy
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

@@ -2,7 +2,7 @@ name: Mirror and Deploy from Repo A
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "0 0,12 * * *"
   workflow_dispatch:
 
 env:
@@ -29,8 +29,6 @@ jobs:
           clean: true
 
       - name: Prepare Files for Deployment
-        # We copy the contents of web/ to the root so index.html is found,
-        # but we keep all other folders exactly where they are.
         run: |
           cp -r web/* .
           echo "Files prepared. Final root structure:"
@@ -39,7 +37,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the entire root directory (everything)
           path: . 
 
       - name: Deploy to GitHub Pages

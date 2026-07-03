@@ -1,4 +1,4 @@
-name: Mirror and Deploy from Repo A
+name: Mirror and Deploy from External Main Repo
 
 on:
   schedule:
